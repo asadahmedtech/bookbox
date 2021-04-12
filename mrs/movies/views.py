@@ -26,6 +26,10 @@ class TheaterList(generics.ListCreateAPIView):
         
         return queryset
 
+class TheaterSeatList(generics.ListCreateAPIView):
+    queryset = TheaterSeat.objects.all()
+    serializer_class = TheaterSeatSerializer
+
 class MovieList(generics.ListCreateAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer

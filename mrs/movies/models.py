@@ -29,6 +29,21 @@ class Theater(models.Model):
     def __str__(self):
         return '{}-{}-{}'.format(self.name, self.address, self.city)
 
+# TheaterSeat Model for defining the seats in the theaters
+class TheaterSeat(models.Model):
+    seat_choice = (
+        ('PREMIUM','Premium'),
+        ('NORMAL','Normal'),
+        ('RECLINER','Recliner'),
+        ('FRONT','Front'),
+    )
+    seatNumber = models.CharField(max_length=5, null=False)
+    seatType = models.CharField(max_length=20, null=False, choices=seat_choice)
+    theater = models.ForeignKey(Theater, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{}-{}-{}'.format(self.seatNumber, self.seatType, self.theater)
+
 # Movie model for defining the movies currently being shown
 class Movie(models.Model):
     lang_choice = (

@@ -8,9 +8,16 @@ class CitySerializer(serializers.ModelSerializer):
 
 class TheaterSerializer(serializers.ModelSerializer):
     city = CitySerializer(many=False)
-    
+
     class Meta:
         model = Theater
+        fields = '__all__'
+
+class TheaterSeatSerializer(serializers.ModelSerializer):
+    theater = TheaterSerializer(many=False)
+
+    class Meta:
+        model = TheaterSeat
         fields = '__all__'
 
 class MovieSerializer(serializers.ModelSerializer):
