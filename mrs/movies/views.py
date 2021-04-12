@@ -26,7 +26,6 @@ class TheaterList(generics.ListCreateAPIView):
         
         return queryset
 
-
 class MovieList(generics.ListCreateAPIView):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
@@ -34,3 +33,19 @@ class MovieList(generics.ListCreateAPIView):
 class ShowList(generics.ListCreateAPIView):
     queryset = Show.objects.all()
     serializer_class = ShowSerializer
+
+    def get_queryset(self):
+        queryset = Show.objects.all()
+        cityID = self.request.query_params.get('city')
+        theaterID = self.request.query_params.get('theater')
+        movieID = self.request.query_params.get('movie')
+
+        if movieID:
+            queryset = queryset.filter(movie=movieID)
+        if theaterID:
+            queryset = queryset.filter(theater=theaterID)
+        if cityID:
+            queryset = queryset.filter(theater__city=cityID)
+        
+        return queryset
+
