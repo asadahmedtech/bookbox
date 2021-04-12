@@ -64,5 +64,5 @@ class Show(models.Model):
     show_time = models.DateTimeField()
 
     def __str__(self):
-        return '{}-{}-{}'.format(self.movie, self.theatre,self.show_time)
+        return '{}-{}-{}'.format(self.movie, self.theater,self.show_time)
 
