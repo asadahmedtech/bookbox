@@ -18,10 +18,10 @@ class TheaterList(generics.ListCreateAPIView):
         movieID = self.request.query_params.get('movie')
 
         if cityID:
-            queryset = queryset.filter(city=cityID)
+            queryset = queryset.filter(city__city=cityID)
         if movieID:
             showqueryset = Show.objects.all()
-            showqueryset = showqueryset.filter(movie=movieID).values_list('theater__id', flat=True)
+            showqueryset = showqueryset.filter(movie__name=movieID).values_list('theater__id', flat=True)
             queryset = queryset.filter(id__in=showqueryset)
         
         return queryset
@@ -45,11 +45,11 @@ class ShowList(generics.ListCreateAPIView):
         movieID = self.request.query_params.get('movie')
 
         if movieID:
-            queryset = queryset.filter(movie=movieID)
+            queryset = queryset.filter(movie__name=movieID)
         if theaterID:
             queryset = queryset.filter(theater=theaterID)
         if cityID:
-            queryset = queryset.filter(theater__city=cityID)
+            queryset = queryset.filter(theater__city__city=cityID)
         
         return queryset
 
