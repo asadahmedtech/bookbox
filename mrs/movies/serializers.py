@@ -14,7 +14,7 @@ class TheaterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class TheaterSeatSerializer(serializers.ModelSerializer):
-    # theater = TheaterSerializer(many=False, read_only=True)
+    theater = TheaterSerializer(many=False, read_only=True)
 
     class Meta:
         model = TheaterSeat
@@ -26,8 +26,8 @@ class MovieSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ShowSerializer(serializers.ModelSerializer):
-    # theater = TheaterSerializer(many=False, read_only=True)
-    # movie = MovieSerializer(many=False, read_only=True)
+    theater = TheaterSerializer(many=False, read_only=True)
+    movie = MovieSerializer(many=False, read_only=True)
 
     class Meta:
         model = Show

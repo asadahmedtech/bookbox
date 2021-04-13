@@ -48,8 +48,18 @@ class BookingList(APIView):
 
 
 class ShowSeatList(generics.ListCreateAPIView):
-    queryset = ShowSeat.objects.all()
+    model = ShowSeat
     serializer_class = ShowSeatSerializer
+
+    def get_queryset(self):
+        queryset = ShowSeat.objects.all()
+        showID = self.request.query_params.get('showID')
+
+        if showID:
+            queryset = queryset.filter(show__id=showID)
+        
+        return queryset
+
 
 # class PaymentList(generics.ListCreateAPIView):
 #     queryset = Payment.objects.all()
