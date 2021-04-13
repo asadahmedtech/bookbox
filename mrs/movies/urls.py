@@ -5,6 +5,7 @@ from movies import views
 urlpatterns = [
     path('city/', views.CityList.as_view()),
     path('theater/', views.TheaterList.as_view()),
+    path('theaterseat/', views.TheaterSeatList.as_view()),
     path('movie/', views.MovieList.as_view()),
     path('show/', views.ShowList.as_view()),
 
