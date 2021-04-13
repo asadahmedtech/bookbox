@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from movies.models import *
-from movies.serializers import *
+
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +7,9 @@ from rest_framework import status
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+from movies.models import *
+from movies.serializers import *
 
 city_param = openapi.Parameter('cityID', openapi.IN_QUERY, description="Name of the city", type=openapi.TYPE_STRING)
 movie_param = openapi.Parameter('movieID', openapi.IN_QUERY, description="Name of the movie", type=openapi.TYPE_STRING)

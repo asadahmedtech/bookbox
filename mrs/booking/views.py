@@ -1,6 +1,7 @@
 from django.shortcuts import render
-from booking.models import *
-from booking.serializers import *
+from django.db import transaction
+from django.db.models import Sum
+
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +9,9 @@ from rest_framework import status
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
+from booking.models import *
+from booking.serializers import *
 
 booking_param = openapi.Parameter('bookingID', openapi.IN_QUERY, description="ID of the booking made", type=openapi.TYPE_INTEGER)
 user_param = openapi.Parameter('user', openapi.IN_BODY, description="name of the user", type=openapi.TYPE_STRING)
@@ -75,6 +79,8 @@ class BookingList(APIView):
         try:
             if(request.data['showID'] and request.data['user']):
                 show = Show.objects.get(id=request.data['showID'])
+
+                # Verify and block the seats if they are empty
                 if not self.verify_seats(request.data['seats']):
                     return Response('Seat already booked', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
@@ -82,21 +88,19 @@ class BookingList(APIView):
                 booking = Booking.objects.create(created_at=created_at, show=show, user=request.data['user'])
                 
                 amount = 0
-                for seatID in request.data['seats']:
-                    showSeat = ShowSeat.objects.get(id=seatID)
-                    showSeat.status = True
-                    showSeat.booking = booking
-                    showSeat.save()
+                with transaction.atomic():
+                    ShowSeat.objects.filter(id__in=request.data['seats']).update(booking=booking)
+                    amount = ShowSeat.objects.filter(id__in=request.data['seats']).aggregate(amount=Sum('price'))['amount']
 
-                    amount += showSeat.price
-
-
-                #Create Payment Object
+                #Create Payment Object this will be calling payment gateways
                 payment = Payment.objects.create(booking=booking, created_at=created_at, amount=amount)
-                ##Block Seats
+
                 serializer = BookingSerializer(booking)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except KeyError:
+
+        except Exception as e:
+            #In case of payment failures or domain failures, seats will be unreserved 
+            self.unreserve_seats(request.data['seats'])
             return Response('', status=status.HTTP_400_BAD_REQUEST)
         
     # Filters the queryset based on optional parameters provided
@@ -112,12 +116,23 @@ class BookingList(APIView):
     
     #Verify the seats selected as empty
     def verify_seats(self, seatsList):
+        # return self.unreserve_seats(seatsList)
+
         for seatID in seatsList:
             showSeat = ShowSeat.objects.get(id=seatID)
             if(showSeat.status == True):
                 return False
-        return True
         
+        with transaction.atomic():
+            ShowSeat.objects.filter(id__in=seatsList).update(status=True)
+
+        return True
+
+    #Unreserve the blocked seats if somethings crashes
+    def unreserve_seats(self, seatsList):
+        ShowSeat.objects.filter(id__in=seatsList).update(status=False)
+        return False
+
 class ShowSeatList(generics.ListCreateAPIView):
     '''
     description: This API Lists and Creates Seating information for a give show.
@@ -207,6 +222,7 @@ class PaymentList(APIView):
             if(request.data['paymentID'] and request.data['status']):
                 payment = Payment.objects.get(id=request.data['paymentID'])
                 booking = Booking.objects.get(id=payment.booking.id)
+                print(request.data)
                 if request.data['status'] == "Success":
                     payment.transactionID = request.data['transactionID']
                     booking.status = True
