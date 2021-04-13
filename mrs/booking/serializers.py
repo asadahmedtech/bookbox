@@ -26,18 +26,7 @@ class ShowSeatSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('status', 'booking')
 
-    # def create(self, validated_data):
-    #     user = self.context['request'].user
-    #     TaskProcessedData.objects.create(user=user, **validated_data)
-
-    #     dashboard_obj = Dashboard.objects.get(user=user)
-    #     dashboard_obj.pending = dashboard_obj.pending + 1
-    #     dashboard_obj.save()
-        
-    #     print(validated_data)
-    #     task = TaskPath.objects.get(taskgivenID = str(validated_data.get('taskpath')))
-    #     task.taskCount = task.taskCount + 1
-    #     task.save()
-        
-    #     return validated_data
-
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = '__all__'

@@ -5,6 +5,7 @@ from booking import views
 urlpatterns = [
     path('book/', views.BookingList.as_view()),
     path('seat/', views.ShowSeatList.as_view()),
+    path('payment/', views.PaymentList.as_view()),
 
 ]
 

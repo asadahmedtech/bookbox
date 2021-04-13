@@ -23,3 +23,23 @@ class ShowSeat(models.Model):
 
     def __str__(self):
         return '{}-{}-{}-{}'.format(self.seat, self.status, self.show, self.booking)
+
+# Payment Model for defining the payments of booking
+class Payment(models.Model):
+    payment_choices = (
+        ('DEB','Debit Card'),
+        ('CRD','Credit Card'),
+        ('NET','Net Banking'),
+        ('UPI','UPI'),
+    )
+
+    amount = models.FloatField(null=False)
+    transactionID = models.CharField(max_length=256, null=False)
+    discountID = models.CharField(max_length=256, null=False)
+    created_at = models.DateTimeField()
+    paymentMethod = models.CharField(max_length=3, choices=payment_choices)
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{}-{}-{}-{}'.format(self.amount, self.transactionID, self.created_at, self.booking)
+
