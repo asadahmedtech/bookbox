@@ -1,0 +1,7 @@
+django
+djangorestframework
+django-rest-swagger
+pyyaml
+psycopg2
+pillow
+drf-yasg
