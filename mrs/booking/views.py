@@ -75,20 +75,21 @@ class BookingList(APIView):
         try:
             if(request.data['showID'] and request.data['user']):
                 show = Show.objects.get(id=request.data['showID'])
+                if not self.verify_seats(request.data['seats']):
+                    return Response('Seat already booked', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+
                 created_at = datetime.now()
                 booking = Booking.objects.create(created_at=created_at, show=show, user=request.data['user'])
                 
                 amount = 0
-
                 for seatID in request.data['seats']:
                     showSeat = ShowSeat.objects.get(id=seatID)
-                    if(showSeat.status == False):
-                        showSeat.status = True
-                        showSeat.booking = booking
-                        amount += showSeat.price
-                        showSeat.save()
-                    else:
-                        return Response('Seat already booked', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+                    showSeat.status = True
+                    showSeat.booking = booking
+                    showSeat.save()
+
+                    amount += showSeat.price
+
 
                 #Create Payment Object
                 payment = Payment.objects.create(booking=booking, created_at=created_at, amount=amount)
@@ -108,6 +109,14 @@ class BookingList(APIView):
             queryset = queryset.filter(id=bookingID)
         
         return queryset
+    
+    #Verify the seats selected as empty
+    def verify_seats(self, seatsList):
+        for seatID in seatsList:
+            showSeat = ShowSeat.objects.get(id=seatID)
+            if(showSeat.status == True):
+                return False
+        return True
         
 class ShowSeatList(generics.ListCreateAPIView):
     '''
