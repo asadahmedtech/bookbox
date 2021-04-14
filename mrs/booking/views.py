@@ -106,6 +106,8 @@ class BookingList(APIView):
                 three_mins_hence = datetime.utcnow() + timedelta(minutes=15)
                 unbook_seat_task.apply_async((booking.id,), eta=three_mins_hence)
 
+                serializer.data["PaymentID"] = payment.id 
+                
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
