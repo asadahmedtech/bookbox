@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.db import transaction
 from django.db.models import Sum
+from datetime import datetime, timedelta
 
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -12,6 +13,7 @@ from drf_yasg import openapi
 
 from booking.models import *
 from booking.serializers import *
+from booking.task import *
 
 booking_param = openapi.Parameter('bookingID', openapi.IN_QUERY, description="ID of the booking made", type=openapi.TYPE_INTEGER)
 user_param = openapi.Parameter('user', openapi.IN_BODY, description="name of the user", type=openapi.TYPE_STRING)
@@ -96,10 +98,16 @@ class BookingList(APIView):
                 payment = Payment.objects.create(booking=booking, created_at=created_at, amount=amount)
 
                 serializer = BookingSerializer(booking)
+
+                #Apply async unreserve hook
+                three_mins_hence = datetime.utcnow() + timedelta(minutes=15)
+                unbook_seat_task.apply_async((booking.id,), eta=three_mins_hence)
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             #In case of payment failures or domain failures, seats will be unreserved 
+            print(str(e))
             self.unreserve_seats(request.data['seats'])
             return Response('', status=status.HTTP_400_BAD_REQUEST)
         

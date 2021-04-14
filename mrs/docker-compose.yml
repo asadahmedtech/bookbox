@@ -26,3 +26,37 @@ services:
       - "8000:8000"
     depends_on:
       - db
+  redis:
+    image: redis:alpine
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A mrs worker -l info
+    volumes:
+      - .:/code
+    environment:
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+    depends_on:
+      - db
+      - redis
+      - web
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A mrs beat -l info
+    volumes:
+      - .:/code
+    environment:
+      - DB_HOST=db
+      - DB_NAME=postgres
+      - DB_USER=postgres
+      - DB_PASS=postgres
+    depends_on:
+      - db
+      - redis
+      - web

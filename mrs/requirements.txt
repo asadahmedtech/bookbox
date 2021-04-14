@@ -5,3 +5,5 @@ pyyaml
 psycopg2
 pillow
 drf-yasg
+celery
+redis
