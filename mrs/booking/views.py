@@ -80,7 +80,10 @@ class BookingList(APIView):
 
         try:
             if(request.data['showID'] and request.data['user']):
-                show = Show.objects.get(id=request.data['showID'])
+                try:
+                    show = Show.objects.get(id=request.data['showID'])
+                except Show.DoesNotExist:
+                    return Response('Show Not Found', status=status.HTTP_404_NOT_FOUND)
 
                 # Verify and block the seats if they are empty
                 if not self.verify_seats(request.data['seats']):
@@ -127,7 +130,11 @@ class BookingList(APIView):
         # return self.unreserve_seats(seatsList)
 
         for seatID in seatsList:
-            showSeat = ShowSeat.objects.get(id=seatID)
+            try:
+                showSeat = ShowSeat.objects.get(id=seatID)
+            except ShowSeat.DoesNotExist:
+                return False
+
             if(showSeat.status == True):
                 return False
         
@@ -228,8 +235,16 @@ class PaymentList(APIView):
         '''
         try:
             if(request.data['paymentID'] and request.data['status']):
-                payment = Payment.objects.get(id=request.data['paymentID'])
-                booking = Booking.objects.get(id=payment.booking.id)
+                try:
+                    payment = Payment.objects.get(id=request.data['paymentID'])
+                except Payment.DoesNotExist:
+                    return Response('PaymentID Not Found', status=status.HTTP_404_NOT_FOUND)
+
+                try:
+                    booking = Booking.objects.get(id=payment.booking.id)
+                except Booking.DoesNotExist:
+                    return Response('BookingID Not Found', status=status.HTTP_404_NOT_FOUND)
+
                 print(request.data)
                 if booking.status == 'FAIL':
                     #Spawn a payment refund process

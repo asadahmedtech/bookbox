@@ -107,7 +107,11 @@ class TheaterList(APIView):
 
         try:
             if(request.data['name'] and request.data['city'] and request.data['address']):
-                city = City.objects.get(city=request.data['city'])
+                try:
+                    city = City.objects.get(city=request.data['city'])
+                except City.DoesNotExist:
+                    return Response('City Not Found', status=status.HTTP_404_NOT_FOUND)
+
                 theater = Theater.objects.create(city=city, name=request.data['name'], address=request.data['address'])
                 serializer = TheaterSerializer(theater)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -186,7 +190,11 @@ class TheaterSeatList(APIView):
         '''
         try:
             if(request.data['seatNumber'] and request.data['seatType'] and request.data['theater']):
-                theater = Theater.objects.get(id=request.data['theater'])
+                try:
+                    theater = Theater.objects.get(id=request.data['theater'])
+                except Theater.DoesNotExist:
+                    return Response('Theater Not Found', status=status.HTTP_404_NOT_FOUND)
+
                 theaterseat = TheaterSeat.objects.create(seatNumber=request.data['seatNumber'], theater=theater, seatType=request.data['seatType'])
                 serializer = TheaterSeatSerializer(theaterseat)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -306,8 +314,16 @@ class ShowList(APIView):
 
         try:
             if(request.data['movie'] and request.data['theater'] and request.data['showtime']):
-                movie = Movie.objects.get(name=request.data['movie'])
-                theater = Theater.objects.get(name=request.data['theater'])
+                try:
+                    movie = Movie.objects.get(name=request.data['movie'])
+                except Movie.DoesNotExist:
+                    return Response('Movie Not Found', status=status.HTTP_404_NOT_FOUND)
+
+                try:
+                    theater = Theater.objects.get(name=request.data['theater'])
+                except Theater.DoesNotExist:
+                    return Response('Theater Not Found', status=status.HTTP_404_NOT_FOUND)
+
                 show = Show.objects.create(movie=movie, theater=theater, show_time=request.data['showtime'])
                 serializer = ShowSerializer(show)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
