@@ -73,7 +73,7 @@ All the List APIs work using GET requests. Same endpoints can be used for creati
 #### -- Data Entry
 The docker images comes with pre-popoulated data for city, theater, show, seats in a theater and seats in a show. The database schema is provided below. 
 
-![Database Schema](https://github.com/asadahmedtech/bookbox/blob/master/dbschema.png?raw=true)
+![Database Schema](https://github.com/asadahmedtech/bookbox/blob/main/mrs/dbschema.png?raw=true)
 
 In order for populating new fields following POST requests are to be made.
 1. Add new city:
