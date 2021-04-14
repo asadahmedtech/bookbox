@@ -87,7 +87,7 @@ class BookingList(APIView):
                     return Response('Seat already booked', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
                 created_at = datetime.now()
-                booking = Booking.objects.create(created_at=created_at, show=show, user=request.data['user'])
+                booking = Booking.objects.create(created_at=created_at, show=show, user=request.data['user'], status='PROG')
                 
                 amount = 0
                 with transaction.atomic():
@@ -231,11 +231,14 @@ class PaymentList(APIView):
                 payment = Payment.objects.get(id=request.data['paymentID'])
                 booking = Booking.objects.get(id=payment.booking.id)
                 print(request.data)
+                if booking.status == 'FAIL':
+                    #Spawn a payment refund process
+                    return Response('Booking Timeout', status=status.HTTP_422_UNPROCESSABLE_ENTITY)
                 if request.data['status'] == "Success":
                     payment.transactionID = request.data['transactionID']
-                    booking.status = True
+                    booking.status = 'SUCC'
                 else:
-                    booking.status = False
+                    booking.status = 'FAIL'
                     ShowSeat.objects.filter(booking=booking.id).update(status=False)
                     ShowSeat.objects.filter(booking=booking.id).update(booking=None)
                 

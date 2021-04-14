@@ -8,17 +8,19 @@ from booking.models import *
 def unbook_seat_task(bookingID):
     print("Unbooking now")
     try:
-        booking = Booking.objects.get(pk=bookingID)
-        if(booking.status):
+        booking = Booking.objects.get(id=bookingID)
+        if(booking.status == 'SUCC'):
             print("Payment Success")
             return
         
         #Unreserving tickets
         print("Unreserving Seats")
         with transaction.atomic():
+            booking.status = 'FAIL'
+            booking.save()
             ShowSeat.objects.filter(booking=booking.id).update(status=False)
             ShowSeat.objects.filter(booking=booking.id).update(booking=None)
-        
+
         return
 
     except Booking.DoesNotExist:

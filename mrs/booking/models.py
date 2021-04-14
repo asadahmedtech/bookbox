@@ -5,7 +5,13 @@ from movies.models import *
 
 # Booking Model for defining the booking of shows
 class Booking(models.Model):
-    status = models.BooleanField(null=True, default=False)
+    status_choices = (
+        ('SUCC','Success'),
+        ('FAIL','Failed'),
+        ('PROG','Progress'),
+        ('NULL','Null'),
+    )
+    status = models.CharField(max_length=20, null=True, default='NULL', choices=status_choices)
     show = models.ForeignKey(Show, null=False, on_delete=models.CASCADE)
     user = models.CharField(max_length=100, null=True)
     created_at = models.DateTimeField()
@@ -19,7 +25,7 @@ class ShowSeat(models.Model):
     price = models.FloatField(null=False)
     status = models.BooleanField(default=False)
     show = models.ForeignKey(Show, on_delete=models.CASCADE)
-    booking = models.ForeignKey(Booking, null=True ,on_delete=models.CASCADE)
+    booking = models.ForeignKey(Booking, null=True ,on_delete=models.SET_NULL)
 
     def __str__(self):
         return '{}-{}-{}-{}'.format(self.seat, self.status, self.show, self.booking)
